@@ -9,6 +9,7 @@ categories = ["command-line-utilities", "config"]
 
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
+colored = "2.1.0"
 inquire = "0.7.5"
 reqwest = "0.12.4"
 scraper = "0.19.0"

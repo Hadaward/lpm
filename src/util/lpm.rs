@@ -4,14 +4,12 @@ use inquire::{Confirm, Text};
 use simple_home_dir::home_dir;
 
 use super::environment::{get_env_var, set_env_var};
+use super::join_path;
 
 pub fn create_lpm_home() -> Result<String, Box<dyn Error>> {
     let default_home = home_dir().expect("Failed to get home dir");
-    let default_home = Path::new(
-        default_home.to_str().expect("Failed to convert home dir to string")
-    ).join("lpm");
+    let mut default_home = join_path(default_home.to_str().expect("Failed to convert path to string"), "lpm");
 
-    let mut default_home = String::from(default_home.to_str().expect("Failed to convert path to string"));
     let answer = Confirm::new(format!("Lua Package Manager will be installed on '{}' by default, do you agree?", default_home).as_str())
     .with_default(true)
     .with_help_message("Home directory of LPM")
@@ -25,7 +23,8 @@ pub fn create_lpm_home() -> Result<String, Box<dyn Error>> {
     
     Ok(default_home)
 }
-pub async fn check_lpm_install() -> Result<(), Box<dyn Error>> {
+/// Return LPM HOME dir
+pub async fn check_lpm_install() -> Result<String, Box<dyn Error>> {
     let lpm_home_dir: String;
 
     match get_env_var("LPM_HOME") {
@@ -38,6 +37,7 @@ pub async fn check_lpm_install() -> Result<(), Box<dyn Error>> {
     }
 
     fs::create_dir_all(lpm_home_dir.clone())?;
+    fs::create_dir_all(join_path(lpm_home_dir.clone().as_str(), "downloads"))?;
 
     match env::current_exe() {
         Ok(exe_path) => {
@@ -70,5 +70,5 @@ pub async fn check_lpm_install() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    Ok(())
+    Ok(lpm_home_dir)
 }
