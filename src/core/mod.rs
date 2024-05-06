@@ -3,6 +3,17 @@ use tokio::{fs::{read_to_string, File}, io::AsyncWriteExt};
 use simple_home_dir::home_dir;
 
 use crate::pathutil::join_string_path;
+pub mod install;
+
+pub fn get_homedir() -> String {
+    let home = home_dir()
+        .expect("Impossible to retrieve home directory");
+    let home = home
+        .to_str()
+        .expect("Impossible to convert home directory to string");
+
+    return String::from(home);
+}
 
 pub fn get_homeref_path() -> String {
     let home = home_dir()
@@ -40,6 +51,6 @@ pub async fn get_lpm_home() -> Result<String, Box<dyn Error>> {
     if is_first_run().await? {
         return Err(Box::new(std::io::Error::new(ErrorKind::NotFound, "This is the first run so the .LPM_HOMEREF file doesn't exist yet.")));
     }
-    
+
     Ok(read_to_string(get_homeref_path()).await?)
 }

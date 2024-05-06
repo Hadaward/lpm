@@ -716,7 +716,6 @@ dependencies = [
  "scraper",
  "simple-home-dir",
  "tokio",
- "winreg",
 ]
 
 [[package]]
