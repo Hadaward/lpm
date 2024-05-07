@@ -1,9 +1,12 @@
-use std::error::Error;
+use std::{env::current_exe, error::Error};
 
 use colored::Colorize;
 use inquire::{Confirm, Text};
+use tokio::fs;
 
-use crate::{core::{get_homedir, get_homeref_path}, pathutil::{is_directory_empty, is_file, join_string_path}};
+use crate::{core::{create_homeref, get_homedir, get_homeref_path}, pathutil::{is_directory_empty, is_file, join_string_path}};
+
+use super::get_lpm_home;
 
 pub fn ask_should_be_installed() -> Result<bool, Box<dyn Error>> {
     Ok(
@@ -66,6 +69,35 @@ pub async fn first_run() -> Result<(), Box<dyn Error>> {
         "LPM".bright_blue(),
         get_homeref_path().yellow()
     );
+
+    create_homeref(&homedir).await?;
+    fs::create_dir_all(&homedir).await?;
+    fs::create_dir_all(join_string_path(&homedir, "downloads")).await?;
+
+    match current_exe() {
+        Ok(current_path) => {
+            let current_path = current_path.to_str().expect("Unable to convert executable's current path to string");
+            let new_path = join_string_path(&homedir, "lpm.exe");
+            
+            fs::rename(current_path, new_path.clone()).await?;
+            println!("{} was moved to {}.", current_path.yellow(), new_path.bright_green());
+        },
+        Err(e) => {
+            return Err(Box::new(e))
+        },
+    };
+
+    println!("You need to add {} to your system's PATH", homedir.bright_green());
+
+    Ok(())
+}
+
+pub async fn uninstall() -> Result<(), Box<dyn Error>> {
+    let homedir = get_lpm_home().await?;
+
+    fs::remove_dir_all(&homedir).await?;
+    fs::remove_dir_all(join_string_path(&homedir, "downloads")).await?;
+    fs::remove_file(&get_homeref_path()).await?;
 
     Ok(())
 }

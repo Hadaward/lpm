@@ -4,23 +4,24 @@ use simple_home_dir::home_dir;
 
 use crate::pathutil::join_string_path;
 pub mod install;
+pub mod cli;
 
 pub fn get_homedir() -> String {
     let home = home_dir()
-        .expect("Impossible to retrieve home directory");
+        .expect("Unable to retrieve home directory");
     let home = home
         .to_str()
-        .expect("Impossible to convert home directory to string");
+        .expect("Unable to convert home directory to string");
 
     return String::from(home);
 }
 
 pub fn get_homeref_path() -> String {
     let home = home_dir()
-        .expect("Impossible to retrieve home directory");
+        .expect("Unable to retrieve home directory");
     let home = home
         .to_str()
-        .expect("Impossible to convert home directory to string");
+        .expect("Unable to convert home directory to string");
 
     return join_string_path(home, &".LPM_HOMEREF");
 }
